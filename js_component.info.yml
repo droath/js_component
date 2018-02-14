@@ -1,0 +1,5 @@
+type: module
+name: JS Component
+description: Define JS components as custom blocks from a theme or module.
+core: 8.x
+package: Other

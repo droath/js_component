@@ -1,0 +1,7 @@
+test.page:
+  path: "/admin/testing"
+  defaults:
+    _title: "Testing"
+    _controller: Drupal\js_component\Controller\Page::build
+  requirements:
+    _access: "TRUE"

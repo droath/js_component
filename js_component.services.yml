@@ -1,0 +1,4 @@
+services:
+  plugin.manager.js_component:
+    class: \Drupal\js_component\JSComponentManager
+    arguments: ["@container.namespaces", "@module_handler", "@theme_handler", "@cache.discovery", "@typed_data_manager"]

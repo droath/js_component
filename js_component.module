@@ -1,0 +1,21 @@
+<?php
+
+use Drupal\js_component\JSComponentManager;
+use Drupal\js_component\Plugin\JSComponent;
+
+/**
+ * Implements hook_library_info_build().
+ */
+function js_component_library_info_build() {
+  /** @var JSComponentManager $manager */
+  $manager = \Drupal::service('plugin.manager.js_component');
+
+  $libraries =  [];
+  /** @var JSComponent $instance */
+  foreach ($manager->getDefinitionInstances() as $plugin_id => $instance) {
+    $key = "{$instance->provider()}.{$plugin_id}";
+    $libraries[$key] = $instance->processLibraries();
+  }
+
+  return $libraries;
+}
