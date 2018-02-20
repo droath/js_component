@@ -2,7 +2,7 @@
 
 The module provides a streamlined solution for adding simple React or JS based components to the Drupal ecosystem. The module is more developer centric, as it allows developers to define JS components by exposing a plugin or by placing a YAML file within the module or theme directory.
 
-The `libraries` directive follows the same syntax as what you would expect in a `*.libraries.yml`. The `settings` directive allows you to collect information from the site-builder. It follows the same structure as the Drupal form API. Inputed settings data is exposed to the JS component using the `drupalSettings` concept.
+The `libraries` directive follows the same syntax as what you would expect in a `*.libraries.yml`. The `settings` directive allows you to collect information from the site-builder. It follows the same structure as the Drupal form API. Inputted settings are exposed to the JS component using the `drupalSettings` concept.
 
 Below is an example of what a JS component YAML base definition looks like. 
 
