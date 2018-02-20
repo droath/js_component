@@ -7,7 +7,7 @@ The `libraries` directive follows the same syntax as what you would expect in a 
 Below is an example of what a JS component YAML base definition looks like. 
 
 
-`[THEME/MODULE].js_components.yml`
+`[THEME/MODULE].js_component.yml`
 
 ```
 component_1:
