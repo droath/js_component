@@ -1,0 +1,13 @@
+{
+    "name": "droath/js_component",
+    "description": "Define JS components as custom blocks from a theme or module.",
+    "type": "drupal-module",
+    "license": "GPLv2",
+    "authors": [
+        {
+            "name": "Travis Tomka",
+            "email": "underoathosx@gmail.com"
+        }
+    ],
+    "require": {}
+}
