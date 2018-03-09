@@ -6,13 +6,13 @@ The `libraries` directive follows the same syntax as what you would expect in a 
 
 Below is an example of what a JS component YAML base definition looks like. 
 
-
 `[THEME/MODULE].js_component.yml`
 
-```
+```yaml
 component_1:
   label: My React Component
   description: This app will run the world!
+  root_id: root
   libraries:
     js:
       /js_component/react-app/build/static/js/main.ca4c6d6d.js: {}
@@ -31,11 +31,12 @@ component_1:
 
 ```
 
-If you need to encapsulate a component as a twig template file. Which then you can define the template as:
+If you need to encapsulate a component as a twig template file. Which then you can define the following in the JS component definition:
 
 ```yaml
 component_2:
   label: Twig Template
+  description: The basic twig template example.
   template: js_component/custom/twig-template.html.twig
   libraries:
     css:
@@ -47,5 +48,3 @@ component_2:
       title: Header Title
       description: Input JS component header title.
 ```
-
-
