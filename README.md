@@ -31,3 +31,21 @@ component_1:
 
 ```
 
+If you need to encapsulate a component as a twig template file. Which then you can define the template as:
+
+```yaml
+component_2:
+  label: Twig Template
+  template: js_component/custom/twig-template.html.twig
+  libraries:
+    css:
+      theme:
+        /js_component/custom/main.css: {}
+  settings:
+    header_title:
+      type: textfield
+      title: Header Title
+      description: Input JS component header title.
+```
+
+
