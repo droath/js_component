@@ -2,6 +2,8 @@
 
 namespace Drupal\js_component\Plugin;
 
+use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Extension\ThemeHandlerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Plugin\PluginBase;
 use Drupal\Core\TypedData\TypedDataInterface;
@@ -13,6 +15,16 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class JSComponent extends PluginBase implements JSComponentInterface, ContainerFactoryPluginInterface {
 
   /**
+   * @var ThemeHandlerInterface
+   */
+  protected $themeHandler;
+
+  /**
+   * @var ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
    * JS component constructor.
    *
    * @param array $configuration
@@ -22,8 +34,12 @@ class JSComponent extends PluginBase implements JSComponentInterface, ContainerF
   public function __construct(
     array $configuration,
     $plugin_id,
-    $plugin_definition) {
+    $plugin_definition,
+    ThemeHandlerInterface $theme_handler,
+    ModuleHandlerInterface $module_handler) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->themeHandler = $theme_handler;
+    $this->moduleHandler = $module_handler;
   }
 
   /**
@@ -53,6 +69,15 @@ class JSComponent extends PluginBase implements JSComponentInterface, ContainerF
   }
 
   /**
+   * JS component root identifier.
+   *
+   * @return string
+   */
+  public function rootId() {
+    return $this->getProperty('root_id') ?: 'root';
+  }
+
+  /**
    * JS component settings.
    *
    * @return array
@@ -68,6 +93,53 @@ class JSComponent extends PluginBase implements JSComponentInterface, ContainerF
    */
   public function libraries() {
     return $this->getProperty('libraries');
+  }
+
+  /**
+   * JS component has libraries.
+   *
+   * @return bool
+   */
+  public function hasLibraries() {
+    return !empty($this->libraries());
+  }
+
+  /**
+   * JS component template.
+   *
+   * @return string
+   */
+  public function template() {
+    return $this->getProperty('template');
+  }
+
+  /**
+   * JS component has template.
+   *
+   * @return bool
+   */
+  public function hasTemplate() {
+    return !empty($this->template());
+  }
+
+  /**
+   * JS component template path.
+   *
+   * @return string
+   * @throws \Exception
+   */
+  public function getTemplatePath() {
+    return "{$this->getProviderPath()}/{$this->templateFileInfo()['dirname']}";
+  }
+
+  /**
+   * JS component template name, without extension.
+   *
+   * @return string
+   */
+  public function getTemplateName() {
+    $file_info = $this->templateFileInfo();
+    return basename($file_info['filename'], '.html');
   }
 
   /**
@@ -99,10 +171,11 @@ class JSComponent extends PluginBase implements JSComponentInterface, ContainerF
    * Process JS component libraries.
    *
    * @return array
+   * @throws \Exception
    */
   public function processLibraries() {
     $libraries = $this->libraries();
-    $asset_path = drupal_get_path('theme', $this->provider());
+    $asset_path = $this->getProviderPath();
 
     if (isset($libraries['js'])) {
       foreach ($libraries['js'] as $js_path => $js_info) {
@@ -127,6 +200,25 @@ class JSComponent extends PluginBase implements JSComponentInterface, ContainerF
   }
 
   /**
+   * Get JS component provider path.
+   *
+   * @return string
+   * @throws \Exception
+   */
+  public function getProviderPath() {
+    return drupal_get_path($this->getProviderType(), $this->provider());
+  }
+
+  /**
+   * Get JS component template file info.
+   *
+   * @return array
+   */
+  protected function templateFileInfo() {
+    return pathinfo($this->template());
+  }
+
+  /**
    * Get typed data property value.
    *
    * @param $name
@@ -147,4 +239,23 @@ class JSComponent extends PluginBase implements JSComponentInterface, ContainerF
     return $this->configuration['typed_data'];
   }
 
+  /**
+   * Get Js component provider type.
+   *
+   * @return string
+   * @throws \Exception
+   */
+  protected function getProviderType() {
+    $provider = $this->provider();
+
+    if ($this->themeHandler->themeExists($provider)) {
+      return 'theme';
+    }
+
+    if ($this->moduleHandler->moduleExists($provider)) {
+      return 'module';
+    }
+
+    throw new \Exception('JS component provider type is unknown.');
+  }
 }

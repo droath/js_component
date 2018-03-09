@@ -10,6 +10,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Render\Element\FormElementInterface;
 use Drupal\Core\Render\ElementInfoManagerInterface;
+use Drupal\js_component\JSComponentManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -35,6 +36,11 @@ class JSComponentBlockType extends BlockBase implements ContainerFactoryPluginIn
   protected $elementInfoManager;
 
   /**
+   * @var JSComponentManagerInterface
+   */
+  protected $jsComponentManager;
+
+  /**
    * {@inheritdoc}
    */
   public function defaultConfiguration() {
@@ -56,10 +62,12 @@ class JSComponentBlockType extends BlockBase implements ContainerFactoryPluginIn
     $plugin_id,
     $plugin_definition,
     LibraryDiscoveryInterface $library_discovery,
-    ElementInfoManagerInterface $element_info_manager) {
+    ElementInfoManagerInterface $element_info_manager,
+    JSComponentManagerInterface $js_component_manager) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->elementInfoManager = $element_info_manager;
     $this->libraryDiscovery = $library_discovery;
+    $this->elementInfoManager = $element_info_manager;
+    $this->jsComponentManager = $js_component_manager;
   }
 
   /**
@@ -75,7 +83,8 @@ class JSComponentBlockType extends BlockBase implements ContainerFactoryPluginIn
       $plugin_id,
       $plugin_definition,
       $container->get('library.discovery'),
-      $container->get('plugin.manager.element_info')
+      $container->get('plugin.manager.element_info'),
+      $container->get('plugin.manager.js_component')
     );
   }
 
@@ -93,26 +102,40 @@ class JSComponentBlockType extends BlockBase implements ContainerFactoryPluginIn
    */
   public function blockSubmit($form, FormStateInterface $form_state) {
     parent::blockSubmit($form, $form_state);
-    $this->configuration['settings'] = $form_state->getValue('settings');
+    $this->configuration['settings'] = $form_state->getValue(['settings', 'js_component']);
   }
 
   /**
    * {@inheritdoc}
    */
   public function build() {
+    $component = $this->getComponentInstance();
     $build = [
-      '#markup' => '<div id="root"></div>',
+      '#type' => 'inline_template',
+      '#template' => '<div id="{{ root_id }}"></div>',
+      '#context' => [
+        'root_id' => $component->rootId(),
+      ],
     ];
 
-    // Attach JS settings if they've been set.
+    if ($component->hasTemplate()) {
+      $build = [
+        '#theme' => $this->getComponentId(),
+      ];
+    }
+
     if ($settings = $this->getConfigurationSettings()) {
+      if (isset($build['#theme'])) {
+        $build['#settings'] = $settings;
+      }
+      // Attach JS settings if they've been set.
       $build['#attached']['drupalSettings']['js_component'] = [
         'settings' => $settings
       ];
     }
 
-    // Attach library to component if it has been defined.
     if ($this->hasLibraryForComponent()) {
+      // Attach library to component if it has been defined.
       $build['#attached']['library'][] = "js_component/{$this->getComponentId()}";
     }
 
@@ -126,6 +149,26 @@ class JSComponentBlockType extends BlockBase implements ContainerFactoryPluginIn
    */
   protected function getComponentId() {
     return $this->pluginDefinition['component_id'];
+  }
+
+  /**
+   * JS component instance.
+   *
+   * @return mixed
+   */
+  protected function getComponentInstance() {
+    return $this->jsComponentManager
+      ->createInstance($this->getComponentPluginId());
+  }
+
+  /**
+   * JS component plugin identifier.
+   *
+   * @return string
+   */
+  protected function getComponentPluginId() {
+    $plugin_id = $this->getPluginId();
+    return substr($plugin_id, strpos($plugin_id, ':') + 1);
   }
 
   /**
@@ -155,6 +198,11 @@ class JSComponentBlockType extends BlockBase implements ContainerFactoryPluginIn
     if (!isset($definition['settings'])) {
       return $form;
     }
+    $form['js_component'] = [
+      '#type' => 'details',
+      '#title' => $this->t('JS Component'),
+      '#open' => TRUE,
+    ];
     $settings = $this->getConfigurationSettings();
 
     foreach ($definition['settings'] as $field_name => $field_info) {
@@ -169,7 +217,7 @@ class JSComponentBlockType extends BlockBase implements ContainerFactoryPluginIn
         $element['#default_value'] = $settings[$field_name];
       }
 
-      $form[$field_name] = $element;
+      $form['js_component'][$field_name] = $element;
     }
 
     return $form;

@@ -14,7 +14,7 @@ use Drupal\js_component\Plugin\JSComponentFactory;
 /**
  * Define JS component manager.
  */
-class JSComponentManager extends DefaultPluginManager {
+class JSComponentManager extends DefaultPluginManager implements JSComponentManagerInterface{
 
   /**
    * @var ThemeHandlerInterface
@@ -80,9 +80,7 @@ class JSComponentManager extends DefaultPluginManager {
   }
 
   /**
-   * Get plugin definition instances.
-   *
-   * @return array
+   * {@inheritdoc}
    */
   public function getDefinitionInstances() {
     $instances = [];

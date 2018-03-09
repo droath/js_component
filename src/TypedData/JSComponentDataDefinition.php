@@ -22,8 +22,12 @@ class JSComponentDataDefinition extends ComplexDataDefinitionBase {
     $properties['label'] = DataDefinition::create('string')
       ->setLabel(new TranslatableMarkup('Label'))
       ->setRequired(TRUE);
+    $properties['root_id'] = DataDefinition::create('string')
+        ->setLabel(new TranslatableMarkup('Root ID'));
     $properties['description'] = DataDefinition::create('string')
       ->setLabel(new TranslatableMarkup('Description'));
+    $properties['template'] = DataDefinition::create('string')
+      ->setLabel(new TranslatableMarkup('Template'));
     $properties['settings'] = MapDataDefinition::create()
       ->setLabel(new TranslatableMarkup('Settings'));
     $properties['libraries'] = MapDataDefinition::create()

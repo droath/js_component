@@ -13,9 +13,52 @@ function js_component_library_info_build() {
   $libraries =  [];
   /** @var JSComponent $instance */
   foreach ($manager->getDefinitionInstances() as $plugin_id => $instance) {
+    if (!$instance->hasLibraries()) {
+      continue;
+    }
     $key = "{$instance->provider()}.{$plugin_id}";
     $libraries[$key] = $instance->processLibraries();
   }
 
   return $libraries;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function js_component_theme($existing, $type, $theme, $path) {
+  /** @var JSComponentManager $manager */
+  $manager = \Drupal::service('plugin.manager.js_component');
+
+  $theme_info = [];
+  /** @var JSComponent $instance */
+  foreach ($manager->getDefinitionInstances() as $plugin_id => $instance) {
+    if (!$instance->hasTemplate()) {
+      continue;
+    }
+    $theme_info[$instance->componentId()] = [
+      'render element' => 'element',
+      'path' => $instance->getTemplatePath(),
+      'template' => $instance->getTemplateName(),
+      'preprocess functions' => [
+        'template_preprocess_js_component'
+      ]
+    ];
+  }
+
+  return $theme_info;
+}
+
+/**
+ * Define template preprocess for JS component.
+ *
+ * @param $variables
+ *   An array of theme variables.
+ */
+function template_preprocess_js_component(&$variables) {
+  $element = $variables['element'];
+
+  if (isset($element['#settings']) && !empty($element['#settings'])) {
+    $variables['settings'] = $element['#settings'];
+  }
 }
