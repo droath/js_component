@@ -8,6 +8,7 @@ use Drupal\Core\Block\Annotation\Block;
 use Drupal\Core\Block\BlockBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Drupal\Core\Render\Element;
 use Drupal\Core\Render\Element\FormElementInterface;
 use Drupal\Core\Render\ElementInfoManagerInterface;
 use Drupal\js_component\JSComponentManagerInterface;
@@ -218,6 +219,10 @@ class JSComponentBlockType extends BlockBase implements ContainerFactoryPluginIn
       }
 
       $form['js_component'][$field_name] = $element;
+    }
+
+    if (count(Element::children($form['js_component'])) === 0) {
+      unset($form['js_component']);
     }
 
     return $form;
